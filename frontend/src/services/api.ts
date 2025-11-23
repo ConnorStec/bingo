@@ -1,12 +1,13 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export const api = {
-  async createRoom() {
+  async createRoom(prePopulate: boolean = false) {
     const response = await fetch(`${API_URL}/rooms`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ prePopulate }),
     });
 
     if (!response.ok) {

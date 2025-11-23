@@ -8,11 +8,12 @@ export const Home = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [joinCode, setJoinCode] = useState('');
   const [isJoining, setIsJoining] = useState(false);
+  const [prePopulateOptions, setPrePopulateOptions] = useState(false);
 
   const handleCreateRoom = async () => {
     setIsCreating(true);
     try {
-      const { joinCode } = await api.createRoom();
+      const { joinCode } = await api.createRoom(prePopulateOptions);
       navigate(`/join/${joinCode}`);
     } catch (error) {
       console.error('Failed to create room:', error);
@@ -63,7 +64,7 @@ export const Home = () => {
         </h1>
 
         <div className="space-y-6">
-          <div>
+          <div className="space-y-3">
             <button
               onClick={handleCreateRoom}
               disabled={isCreating}
@@ -71,6 +72,15 @@ export const Home = () => {
             >
               {isCreating ? 'Creating...' : 'Create New Room'}
             </button>
+            <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={prePopulateOptions}
+                onChange={(e) => setPrePopulateOptions(e.target.checked)}
+                className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+              />
+              <span>Pre-fill options</span>
+            </label>
           </div>
 
           <div className="relative">
@@ -88,7 +98,7 @@ export const Home = () => {
                 type="text"
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                placeholder="Enter join code"
+                placeholder="Enter code"
                 maxLength={5}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase text-center text-2xl font-bold tracking-widest"
               />

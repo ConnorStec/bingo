@@ -9,11 +9,10 @@ interface LobbyProps {
 }
 
 export const Lobby = ({ room, currentPlayer }: LobbyProps) => {
-  const { addOption, removeOption, createCards, closeRoom } = useSocket();
+  const { addOption, removeOption, createCards } = useSocket();
   const { addNotification } = useNotifications();
   const [newOption, setNewOption] = useState('');
   const [copied, setCopied] = useState(false);
-  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   const handleAddOption = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,11 +39,6 @@ export const Lobby = ({ room, currentPlayer }: LobbyProps) => {
     } catch (err) {
       addNotification('Failed to copy room code', 'warning');
     }
-  };
-
-  const handleCloseRoom = () => {
-    closeRoom(room.id);
-    setShowCloseConfirm(false);
   };
 
   const canCreateCards = room.optionsPool.length >= 24;
@@ -134,7 +128,7 @@ export const Lobby = ({ room, currentPlayer }: LobbyProps) => {
           </div>
         </form>
 
-        <div className="space-y-2 max-h-96 overflow-y-auto">
+        <div className="space-y-2">
           {room.optionsPool.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
               No options yet. Add your first bingo option above!
@@ -157,46 +151,6 @@ export const Lobby = ({ room, currentPlayer }: LobbyProps) => {
           )}
         </div>
       </div>
-
-      {room.isOpen && (
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">Room Settings</h2>
-          <button
-            onClick={() => setShowCloseConfirm(true)}
-            className="w-full sm:w-auto px-6 py-3 min-h-[44px] bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold rounded-lg transition-colors"
-          >
-            Close Room to New Players
-          </button>
-          <p className="text-sm text-gray-600 mt-2">
-            Closing the room will prevent new players from joining.
-          </p>
-        </div>
-      )}
-
-      {showCloseConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Close Room?</h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to close the room? New players will no longer be able to join.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => setShowCloseConfirm(false)}
-                className="flex-1 px-6 py-3 min-h-[44px] bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-800 font-semibold rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCloseRoom}
-                className="flex-1 px-6 py-3 min-h-[44px] bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold rounded-lg transition-colors"
-              >
-                Close Room
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

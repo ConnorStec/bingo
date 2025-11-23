@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Room, RoomStatus } from '../entities/room.entity';
+import { CreateRoomDto } from '../common/dto/create-room.dto';
 
 @Injectable()
 export class RoomsService {
@@ -10,7 +11,7 @@ export class RoomsService {
     private roomRepository: Repository<Room>,
   ) {}
 
-  async createRoom() {
+  async createRoom(createRoomDto?: CreateRoomDto) {
     const joinCode = this.generateJoinCode();
 
     // Ensure join code is unique
@@ -20,15 +21,20 @@ export class RoomsService {
 
     if (existing) {
       // Recursively try again with a new code
-      return this.createRoom();
+      return this.createRoom(createRoomDto);
     }
+
+    // Generate 24 test options if requested
+    const optionsPool = createRoomDto?.prePopulate
+      ? Array.from({ length: 24 }, (_, i) => `Option ${i + 1}`)
+      : [];
 
     const room = this.roomRepository.create({
       joinCode,
       creatorId: null, // Will be set when first player joins
       status: RoomStatus.LOBBY,
       isOpen: true,
-      optionsPool: [],
+      optionsPool,
     });
 
     return this.roomRepository.save(room);

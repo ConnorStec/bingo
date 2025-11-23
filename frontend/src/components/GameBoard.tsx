@@ -112,7 +112,7 @@ export const GameBoard = ({ room, currentPlayer, onViewAllCards }: GameBoardProp
                     space.isFreeSpace
                       ? 'bg-yellow-400 text-yellow-900 cursor-default'
                       : space.isMarked
-                      ? 'bg-green-500 text-white shadow-lg'
+                      ? 'bg-white text-gray-800 border-4 border-green-500 shadow-lg'
                       : 'bg-white text-gray-800 hover:bg-gray-100 active:bg-gray-200 cursor-pointer'
                   }
                 `}

@@ -3,6 +3,7 @@ import { RoomsService } from './rooms.service';
 import { PlayersService } from '../players/players.service';
 import { CardsService } from '../cards/cards.service';
 import { JoinRoomDto } from '../common/dto/join-room.dto';
+import { CreateRoomDto } from '../common/dto/create-room.dto';
 
 @Controller('rooms')
 export class RoomsController {
@@ -13,8 +14,8 @@ export class RoomsController {
   ) {}
 
   @Post()
-  async createRoom() {
-    const room = await this.roomsService.createRoom();
+  async createRoom(@Body() createRoomDto: CreateRoomDto) {
+    const room = await this.roomsService.createRoom(createRoomDto);
     return {
       roomId: room.id,
       joinCode: room.joinCode,
