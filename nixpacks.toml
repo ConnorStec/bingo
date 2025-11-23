@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ['nodejs-20_x']
+
+[phases.install]
+cmds = ['npm ci']
+
+[phases.build]
+cmds = [
+  'npm run build -w frontend',
+  'npm run build -w backend',
+  'mkdir -p backend/public',
+  'cp -r frontend/dist/* backend/public/'
+]
+
+[start]
+cmd = 'cd backend && npm run migration:run && node dist/main.js'
