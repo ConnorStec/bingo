@@ -51,7 +51,12 @@ export class CardsService {
 
   async createCardForPlayer(playerId: string, roomId: string, optionsPool: string[]) {
     // Randomly select free space position (0-24)
-    const freeSpacePosition = Math.floor(Math.random() * 25);
+    // Exclude corners (0, 4, 20, 24) and center (12)
+    const excludedPositions = [0, 4, 12, 20, 24];
+    const validPositions = Array.from({ length: 25 }, (_, i) => i).filter(
+      (pos) => !excludedPositions.includes(pos)
+    );
+    const freeSpacePosition = validPositions[Math.floor(Math.random() * validPositions.length)];
 
     // Shuffle the options pool using Fisher-Yates
     const shuffledOptions = this.fisherYatesShuffle([...optionsPool]);
