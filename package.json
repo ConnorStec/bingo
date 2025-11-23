@@ -1,12 +1,18 @@
 {
-  "name": "bingo",
+  "name": "bingo-party",
   "version": "1.0.0",
-  "description": "",
+  "description": "A mobile-first web app for playing bingo with family",
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
-  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "server": "npm run dev --workspace=backend",
+    "ui": "npm run dev --workspace=frontend"
   }
 }

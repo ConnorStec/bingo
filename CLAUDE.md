@@ -280,3 +280,7 @@ The MVP is successful if:
 - Players can step away and return to their cards
 - The experience works well on mobile devices
 - The game runs smoothly on Thanksgiving night for 4-8 hours
+
+
+# IMPORTANT
+- the frontend has `verbatimModuleSyntax` enabled. always import types using the `type` notation, like this `import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';`

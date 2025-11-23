@@ -1,0 +1,154 @@
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Room, RoomStatus } from '../entities/room.entity';
+
+@Injectable()
+export class RoomsService {
+  constructor(
+    @InjectRepository(Room)
+    private roomRepository: Repository<Room>,
+  ) {}
+
+  async createRoom() {
+    const joinCode = this.generateJoinCode();
+
+    // Ensure join code is unique
+    const existing = await this.roomRepository.findOne({
+      where: { joinCode },
+    });
+
+    if (existing) {
+      // Recursively try again with a new code
+      return this.createRoom();
+    }
+
+    const room = this.roomRepository.create({
+      joinCode,
+      creatorId: null, // Will be set when first player joins
+      status: RoomStatus.LOBBY,
+      isOpen: true,
+      optionsPool: [],
+    });
+
+    return this.roomRepository.save(room);
+  }
+
+  async getRoomByJoinCode(joinCode: string) {
+    const room = await this.roomRepository.findOne({
+      where: { joinCode: joinCode.toUpperCase() },
+      relations: {
+        players: {
+          card: {
+            spaces: true,
+          },
+        },
+      },
+      order: {
+        players: {
+          card: {
+            spaces: {
+              position: 'ASC',
+            },
+          },
+        },
+      },
+    });
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    return room;
+  }
+
+  async getRoomById(roomId: string) {
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+      relations: {
+        players: {
+          card: {
+            spaces: true,
+          },
+        },
+      },
+      order: {
+        players: {
+          card: {
+            spaces: {
+              position: 'ASC',
+            },
+          },
+        },
+      },
+    });
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    return room;
+  }
+
+  async closeRoom(roomId: string) {
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+    });
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    room.isOpen = false;
+    return this.roomRepository.save(room);
+  }
+
+  async addOptionToPool(roomId: string, option: string) {
+    const room = await this.getRoomById(roomId);
+
+    if (room.status !== RoomStatus.LOBBY) {
+      throw new BadRequestException('Cannot add options after cards are created');
+    }
+
+    room.optionsPool.push(option);
+    return this.roomRepository.save(room);
+  }
+
+  async removeOptionFromPool(roomId: string, option: string) {
+    const room = await this.getRoomById(roomId);
+
+    if (room.status !== RoomStatus.LOBBY) {
+      throw new BadRequestException('Cannot remove options after cards are created');
+    }
+
+    room.optionsPool = room.optionsPool.filter((opt) => opt !== option);
+    return this.roomRepository.save(room);
+  }
+
+  async canCreateCards(roomId: string): Promise<boolean> {
+    const room = await this.getRoomById(roomId);
+    return room.optionsPool.length >= 24 && room.status === RoomStatus.LOBBY;
+  }
+
+  async updateRoomStatus(roomId: string, status: RoomStatus) {
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+    });
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    room.status = status;
+    return this.roomRepository.save(room);
+  }
+
+  private generateJoinCode(): string {
+    const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed confusing chars
+    let code = '';
+    for (let i = 0; i < 5; i++) {
+      code += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return code;
+  }
+}
