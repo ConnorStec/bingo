@@ -13,4 +13,4 @@ cmds = [
 ]
 
 [start]
-cmd = 'cd backend && npm run migration:run && node dist/main.js'
+cmd = 'cd backend && npm run migration:run:prod && node dist/main.js'
