@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { sessionStorage } from '../services/session';
@@ -9,6 +9,41 @@ export const JoinRoom = () => {
   const [name, setName] = useState('');
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState('');
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+
+  // Check for existing session and auto-reconnect
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      if (!joinCode) {
+        setIsCheckingSession(false);
+        return;
+      }
+
+      const session = sessionStorage.get();
+      if (!session) {
+        setIsCheckingSession(false);
+        return;
+      }
+
+      try {
+        // Fetch room info by join code
+        const room = await api.getRoomByJoinCode(joinCode);
+
+        // If the session's roomId matches this room, reconnect
+        if (session.roomId === room.id) {
+          navigate(`/room/${room.id}`, { replace: true });
+          return;
+        }
+      } catch (err) {
+        // Room doesn't exist or other error, show join form
+        console.error('Failed to check room:', err);
+      }
+
+      setIsCheckingSession(false);
+    };
+
+    checkExistingSession();
+  }, [joinCode, navigate]);
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +71,17 @@ export const JoinRoom = () => {
       setIsJoining(false);
     }
   };
+
+  // Show loading state while checking session
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 text-center">
+          <div className="text-gray-600">Checking session...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center p-4">

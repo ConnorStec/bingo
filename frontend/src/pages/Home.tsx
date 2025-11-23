@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { sessionStorage } from '../services/session';
 
 export const Home = () => {
   const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
   const [joinCode, setJoinCode] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
 
   const handleCreateRoom = async () => {
     setIsCreating(true);
@@ -20,10 +22,36 @@ export const Home = () => {
     }
   };
 
-  const handleJoinRoom = (e: React.FormEvent) => {
+  const handleJoinRoom = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (joinCode.trim()) {
-      navigate(`/join/${joinCode.toUpperCase()}`);
+    if (!joinCode.trim()) return;
+
+    const normalizedCode = joinCode.toUpperCase();
+    setIsJoining(true);
+
+    try {
+      // Check if we have an existing session
+      const session = sessionStorage.get();
+
+      if (session) {
+        // Fetch room info to get roomId
+        const room = await api.getRoomByJoinCode(normalizedCode);
+
+        // If session matches this room, reconnect directly
+        if (session.roomId === room.id) {
+          navigate(`/room/${room.id}`);
+          return;
+        }
+      }
+
+      // No matching session, go to join flow
+      navigate(`/join/${normalizedCode}`);
+    } catch (error) {
+      // Room doesn't exist or error occurred, go to join flow anyway
+      // The join flow will handle the error
+      navigate(`/join/${normalizedCode}`);
+    } finally {
+      setIsJoining(false);
     }
   };
 
@@ -66,10 +94,10 @@ export const Home = () => {
               />
               <button
                 type="submit"
-                disabled={!joinCode.trim()}
+                disabled={!joinCode.trim() || isJoining}
                 className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-4 px-6 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Join Room
+                {isJoining ? 'Joining...' : 'Join Room'}
               </button>
             </div>
           </form>

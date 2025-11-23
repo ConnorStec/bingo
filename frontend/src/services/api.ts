@@ -33,6 +33,17 @@ export const api = {
     return response.json();
   },
 
+  async getRoomByJoinCode(joinCode: string) {
+    const response = await fetch(`${API_URL}/rooms/by-code/${joinCode}`);
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to get room');
+    }
+
+    return response.json();
+  },
+
   async getRoom(roomId: string) {
     const response = await fetch(`${API_URL}/rooms/${roomId}`);
 

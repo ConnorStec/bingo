@@ -33,6 +33,17 @@ export class RoomsController {
     };
   }
 
+  @Get('by-code/:joinCode')
+  async getRoomByJoinCode(@Param('joinCode') joinCode: string) {
+    const room = await this.roomsService.getRoomByJoinCode(joinCode);
+    return {
+      id: room.id,
+      joinCode: room.joinCode,
+      status: room.status,
+      isOpen: room.isOpen,
+    };
+  }
+
   @Get(':roomId')
   async getRoom(@Param('roomId') roomId: string) {
     return this.roomsService.getRoomById(roomId);
