@@ -181,6 +181,25 @@ export class CardsService {
     return false;
   }
 
+  async getAllCardsInRoom(roomId: string) {
+    const cards = await this.cardRepository.find({
+      where: { roomId },
+      relations: ['spaces', 'player'],
+      order: {
+        spaces: {
+          position: 'ASC',
+        },
+      },
+    });
+
+    return cards.map(card => ({
+      id: card.id,
+      playerId: card.playerId,
+      playerName: card.player?.name || 'Unknown',
+      spaces: card.spaces,
+    }));
+  }
+
   private fisherYatesShuffle<T>(array: T[]): T[] {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {

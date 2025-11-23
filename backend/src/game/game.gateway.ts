@@ -190,4 +190,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.emit('error', { message: error.message });
     }
   }
+
+  @SubscribeMessage('get-all-cards')
+  async handleGetAllCards(
+    @MessageBody() data: { roomId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { roomId } = data;
+
+    try {
+      const cards = await this.cardsService.getAllCardsInRoom(roomId);
+      client.emit('all-cards', { cards });
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
 }

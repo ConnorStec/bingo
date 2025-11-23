@@ -10,7 +10,7 @@ export const Home = () => {
   const handleCreateRoom = async () => {
     setIsCreating(true);
     try {
-      const { roomId, joinCode } = await api.createRoom();
+      const { joinCode } = await api.createRoom();
       navigate(`/join/${joinCode}`);
     } catch (error) {
       console.error('Failed to create room:', error);

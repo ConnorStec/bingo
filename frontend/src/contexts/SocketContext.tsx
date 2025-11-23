@@ -13,6 +13,7 @@ interface SocketContextType {
   markSpace: (roomId: string, cardId: string, position: number, playerId: string) => void;
   unmarkSpace: (roomId: string, cardId: string, position: number, playerId: string) => void;
   closeRoom: (roomId: string) => void;
+  getAllCards: (roomId: string) => void;
 }
 
 const SocketContext = createContext<SocketContextType | null>(null);
@@ -34,7 +35,12 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newSocket = io(WS_URL);
+    const newSocket = io(WS_URL, {
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+    });
 
     newSocket.on('connect', () => {
       console.log('Socket connected');
@@ -43,6 +49,24 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
     newSocket.on('disconnect', () => {
       console.log('Socket disconnected');
+      setIsConnected(false);
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+    });
+
+    newSocket.on('reconnect_attempt', (attemptNumber) => {
+      console.log(`Reconnection attempt ${attemptNumber}`);
+    });
+
+    newSocket.on('reconnect', (attemptNumber) => {
+      console.log(`Reconnected after ${attemptNumber} attempts`);
+      setIsConnected(true);
+    });
+
+    newSocket.on('reconnect_failed', () => {
+      console.error('Reconnection failed after all attempts');
       setIsConnected(false);
     });
 
@@ -81,6 +105,10 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     socket?.emit('close-room', { roomId });
   };
 
+  const getAllCards = (roomId: string) => {
+    socket?.emit('get-all-cards', { roomId });
+  };
+
   const value = {
     socket,
     isConnected,
@@ -91,6 +119,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     markSpace,
     unmarkSpace,
     closeRoom,
+    getAllCards,
   };
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

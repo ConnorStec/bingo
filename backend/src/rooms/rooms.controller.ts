@@ -1,6 +1,7 @@
 import { Controller, Post, Get, Param, Body } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { PlayersService } from '../players/players.service';
+import { CardsService } from '../cards/cards.service';
 import { JoinRoomDto } from '../common/dto/join-room.dto';
 
 @Controller('rooms')
@@ -8,6 +9,7 @@ export class RoomsController {
   constructor(
     private roomsService: RoomsService,
     private playersService: PlayersService,
+    private cardsService: CardsService,
   ) {}
 
   @Post()
@@ -39,5 +41,10 @@ export class RoomsController {
   @Post(':roomId/close')
   async closeRoom(@Param('roomId') roomId: string) {
     return this.roomsService.closeRoom(roomId);
+  }
+
+  @Get(':roomId/cards')
+  async getAllCards(@Param('roomId') roomId: string) {
+    return this.cardsService.getAllCardsInRoom(roomId);
   }
 }
