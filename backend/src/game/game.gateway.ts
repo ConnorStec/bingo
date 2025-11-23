@@ -163,13 +163,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { cardId, position, playerId, roomId } = data;
 
     try {
-      await this.cardsService.unmarkSpace(cardId, position);
+      const space = await this.cardsService.unmarkSpace(cardId, position);
 
       // Broadcast to all players in room
       this.server.to(roomId).emit('space-unmarked', {
         playerId,
         cardId,
         position,
+        optionText: space.optionText,
       });
     } catch (error) {
       client.emit('error', { message: error.message });

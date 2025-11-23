@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { SocketProvider } from './contexts/SocketContext';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { NotificationToast } from './components/NotificationToast';
 import { Home } from './pages/Home';
 import { JoinRoom } from './pages/JoinRoom';
 import { Room } from './pages/Room';
@@ -11,7 +10,6 @@ function App() {
     <BrowserRouter>
       <NotificationProvider>
         <SocketProvider>
-          <NotificationToast />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/join/:joinCode" element={<JoinRoom />} />

@@ -21,7 +21,7 @@ export const Room = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const { socket, joinSocketRoom, getAllCards } = useSocket();
-  const { addNotification } = useNotifications();
+  const { addNotification, notifications } = useNotifications();
   const [room, setRoom] = useState<RoomType | null>(null);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,14 +108,17 @@ export const Room = () => {
     });
 
     socket.on('space-marked', (data) => {
-      if (data.playerId !== currentPlayer?.id) {
-        addNotification(`A player marked: ${data.optionText}`, 'info');
-      }
+      const player = room.players.find((p) => p.id === data.playerId);
+      const playerName = player?.name || 'A player';
+      addNotification(`${playerName} marked: ${data.optionText}`, 'info');
       // Reload room to update card states
       api.getRoom(roomId!).then(updateRoomData);
     });
 
-    socket.on('space-unmarked', () => {
+    socket.on('space-unmarked', (data) => {
+      const player = room.players.find((p) => p.id === data.playerId);
+      const playerName = player?.name || 'A player';
+      addNotification(`${playerName} unmarked: ${data.optionText}`, 'info');
       // Reload room to update card states
       api.getRoom(roomId!).then(updateRoomData);
     });
@@ -182,7 +185,12 @@ export const Room = () => {
       {room.status === 'LOBBY' ? (
         <Lobby room={room} currentPlayer={currentPlayer} />
       ) : (
-        <GameBoard room={room} currentPlayer={currentPlayer} onViewAllCards={handleViewAllCards} />
+        <GameBoard
+          room={room}
+          currentPlayer={currentPlayer}
+          onViewAllCards={handleViewAllCards}
+          notifications={notifications}
+        />
       )}
       {showAllCards && (
         <AllCardsView cards={allCards} onClose={() => setShowAllCards(false)} />

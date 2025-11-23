@@ -42,4 +42,5 @@ export interface Notification {
   id: string;
   type: 'info' | 'success' | 'warning';
   message: string;
+  timestamp: number;
 }

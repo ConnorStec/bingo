@@ -29,14 +29,10 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
       id: Date.now().toString(),
       message,
       type,
+      timestamp: Date.now(),
     };
 
-    setNotifications((prev) => [...prev, notification]);
-
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-      setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
-    }, 5000);
+    setNotifications((prev) => [notification, ...prev]);
   }, []);
 
   const removeNotification = useCallback((id: string) => {
