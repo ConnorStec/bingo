@@ -57,6 +57,13 @@ export const Room = () => {
     loadRoom();
   }, [roomId, navigate, joinSocketRoom]);
 
+  // Helper function to update both room and currentPlayer
+  const updateRoomData = (roomData: RoomType) => {
+    setRoom(roomData);
+    const player = roomData.players.find((p: Player) => p.id === currentPlayer?.id);
+    setCurrentPlayer(player || null);
+  };
+
   useEffect(() => {
     if (!socket || !room) return;
 
@@ -71,17 +78,13 @@ export const Room = () => {
     socket.on('reconnect', () => {
       addNotification('Reconnected successfully!', 'success');
       // Reload room data after reconnection
-      api.getRoom(roomId!).then((roomData) => {
-        setRoom(roomData);
-        const player = roomData.players.find((p: Player) => p.id === currentPlayer?.id);
-        setCurrentPlayer(player || null);
-      });
+      api.getRoom(roomId!).then(updateRoomData);
     });
 
     socket.on('player-joined', (data) => {
       addNotification(`${data.name} joined the room`, 'info');
       // Reload room data
-      api.getRoom(roomId!).then(setRoom);
+      api.getRoom(roomId!).then(updateRoomData);
     });
 
     socket.on('option-added', (data) => {
@@ -101,7 +104,7 @@ export const Room = () => {
     socket.on('cards-created', () => {
       addNotification('Cards have been created! Game starting...', 'success');
       // Reload room to get cards
-      api.getRoom(roomId!).then(setRoom);
+      api.getRoom(roomId!).then(updateRoomData);
     });
 
     socket.on('space-marked', (data) => {
@@ -109,12 +112,12 @@ export const Room = () => {
         addNotification(`A player marked: ${data.optionText}`, 'info');
       }
       // Reload room to update card states
-      api.getRoom(roomId!).then(setRoom);
+      api.getRoom(roomId!).then(updateRoomData);
     });
 
     socket.on('space-unmarked', () => {
       // Reload room to update card states
-      api.getRoom(roomId!).then(setRoom);
+      api.getRoom(roomId!).then(updateRoomData);
     });
 
     socket.on('player-won', (data) => {
@@ -127,7 +130,7 @@ export const Room = () => {
     });
 
     socket.on('game-state', (data) => {
-      setRoom(data);
+      updateRoomData(data);
     });
 
     socket.on('error', (data) => {
