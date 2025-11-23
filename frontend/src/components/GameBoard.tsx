@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { type Room, type Player, type CardSpace, type Notification } from '../types';
 import { useSocket } from '../contexts/SocketContext';
 import { useNotifications } from '../contexts/NotificationContext';
@@ -12,6 +13,7 @@ interface GameBoardProps {
 }
 
 export const GameBoard = ({ room, currentPlayer, onViewAllCards, notifications }: GameBoardProps) => {
+  const navigate = useNavigate();
   const { markSpace, unmarkSpace } = useSocket();
   const { addNotification } = useNotifications();
   const [copied, setCopied] = useState(false);
@@ -54,7 +56,12 @@ export const GameBoard = ({ room, currentPlayer, onViewAllCards, notifications }
       {/* Header Row - ~10% */}
       <div className="bg-white shadow-md px-4 py-3 flex-shrink-0">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Bingo!</h1>
+          <h1
+            onClick={() => navigate('/')}
+            className="text-xl sm:text-2xl font-bold text-gray-800 cursor-pointer hover:text-purple-600 transition-colors"
+          >
+            Bingo!
+          </h1>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Room Code:</span>
             <span className="text-lg sm:text-xl font-bold text-purple-600 tracking-widest">

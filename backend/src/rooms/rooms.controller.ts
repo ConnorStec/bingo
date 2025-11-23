@@ -27,6 +27,11 @@ export class RoomsController {
     const room = await this.roomsService.getRoomByJoinCode(joinCode);
     const player = await this.playersService.joinRoom(room.id, joinRoomDto.name, joinRoomDto.avatarUrl);
 
+    // If room is already playing, create a card for the new player
+    if (room.status === 'PLAYING') {
+      await this.cardsService.createCardForPlayer(player.id, room.id, room.optionsPool);
+    }
+
     return {
       roomId: room.id,
       playerId: player.id,
