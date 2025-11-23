@@ -51,9 +51,6 @@ COPY --from=backend-build /app/backend/dist ./backend/dist
 # Copy frontend build into backend's public directory
 COPY --from=frontend-build /app/frontend/dist ./backend/public
 
-# Copy migrations (TypeORM needs source files for migrations)
-COPY backend/src/migrations ./backend/src/migrations
-
 # Expose port
 EXPOSE 3000
 
