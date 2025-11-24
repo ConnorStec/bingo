@@ -31,17 +31,12 @@ A mobile-first web app for playing bingo with family over Thanksgiving evening.
 
    The default values should work for local development.
 
-4. **Generate Prisma client:**
+4. **Run database migrations:**
    ```bash
-   npm run prisma:generate --workspace=backend
+   npm run migration:run --workspace=backend
    ```
 
-5. **Run database migrations:**
-   ```bash
-   npm run migrate --workspace=backend
-   ```
-
-6. **Start development servers:**
+5. **Start development servers:**
    ```bash
    npm run dev
    ```
@@ -57,7 +52,7 @@ A mobile-first web app for playing bingo with family over Thanksgiving evening.
    npm run dev --workspace=frontend
    ```
 
-7. **Open the app:**
+6. **Open the app:**
    Navigate to `http://localhost:5173` in your browser.
 
 ### Development
@@ -91,7 +86,7 @@ bingo-party/
 
 ### Backend (`/backend`)
 - **Framework:** NestJS
-- **Database:** PostgreSQL with Prisma ORM
+- **Database:** PostgreSQL with TypeORM
 - **Real-time:** Socket.IO for WebSocket connections
 - **Key Services:**
   - `RoomsService`: Room management and options pool
@@ -122,9 +117,9 @@ bingo-party/
 - Check `.env` files have correct URLs
 - Ensure CORS is properly configured
 
-### Prisma errors
-- Regenerate client: `npm run prisma:generate --workspace=backend`
+### TypeORM/Migration errors
 - Reset database: `docker-compose down -v && docker-compose up -d`
-- Run migrations again: `npm run migrate --workspace=backend`
+- Run migrations again: `npm run migration:run --workspace=backend`
+- Revert last migration: `npm run migration:revert --workspace=backend`
 
 See CLAUDE.md for detailed project specification.

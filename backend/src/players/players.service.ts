@@ -55,22 +55,14 @@ export class PlayersService {
   }
 
   async getPlayerBySessionToken(sessionToken: string) {
-    return this.playerRepository.findOne({
-      where: { sessionToken },
-      relations: {
-        room: true,
-        card: {
-          spaces: true,
-        },
-      },
-      order: {
-        card: {
-          spaces: {
-            position: 'ASC',
-          },
-        },
-      },
-    });
+    return this.playerRepository
+      .createQueryBuilder('player')
+      .leftJoinAndSelect('player.room', 'room')
+      .leftJoinAndSelect('player.card', 'card')
+      .leftJoinAndSelect('card.spaces', 'space')
+      .where('player.sessionToken = :sessionToken', { sessionToken })
+      .orderBy('space.position', 'ASC')
+      .getOne();
   }
 
   async updateLastSeen(playerId: string) {

@@ -41,25 +41,14 @@ export class RoomsService {
   }
 
   async getRoomByJoinCode(joinCode: string) {
-    const room = await this.roomRepository.findOne({
-      where: { joinCode: joinCode.toUpperCase() },
-      relations: {
-        players: {
-          card: {
-            spaces: true,
-          },
-        },
-      },
-      order: {
-        players: {
-          card: {
-            spaces: {
-              position: 'ASC',
-            },
-          },
-        },
-      },
-    });
+    const room = await this.roomRepository
+      .createQueryBuilder('room')
+      .leftJoinAndSelect('room.players', 'player')
+      .leftJoinAndSelect('player.card', 'card')
+      .leftJoinAndSelect('card.spaces', 'space')
+      .where('room.joinCode = :joinCode', { joinCode: joinCode.toUpperCase() })
+      .orderBy('space.position', 'ASC')
+      .getOne();
 
     if (!room) {
       throw new NotFoundException('Room not found');
@@ -69,25 +58,14 @@ export class RoomsService {
   }
 
   async getRoomById(roomId: string) {
-    const room = await this.roomRepository.findOne({
-      where: { id: roomId },
-      relations: {
-        players: {
-          card: {
-            spaces: true,
-          },
-        },
-      },
-      order: {
-        players: {
-          card: {
-            spaces: {
-              position: 'ASC',
-            },
-          },
-        },
-      },
-    });
+    const room = await this.roomRepository
+      .createQueryBuilder('room')
+      .leftJoinAndSelect('room.players', 'player')
+      .leftJoinAndSelect('player.card', 'card')
+      .leftJoinAndSelect('card.spaces', 'space')
+      .where('room.id = :roomId', { roomId })
+      .orderBy('space.position', 'ASC')
+      .getOne();
 
     if (!room) {
       throw new NotFoundException('Room not found');

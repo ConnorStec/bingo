@@ -187,15 +187,13 @@ export class CardsService {
   }
 
   async getAllCardsInRoom(roomId: string) {
-    const cards = await this.cardRepository.find({
-      where: { roomId },
-      relations: ['spaces', 'player'],
-      order: {
-        spaces: {
-          position: 'ASC',
-        },
-      },
-    });
+    const cards = await this.cardRepository
+      .createQueryBuilder('card')
+      .leftJoinAndSelect('card.spaces', 'space')
+      .leftJoinAndSelect('card.player', 'player')
+      .where('card.roomId = :roomId', { roomId })
+      .orderBy('space.position', 'ASC')
+      .getMany();
 
     return cards.map(card => ({
       id: card.id,
