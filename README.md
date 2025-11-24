@@ -1,6 +1,8 @@
 # Bingo Party
 
-A mobile-first web app for playing bingo with family over Thanksgiving evening.
+A mobile-first web app for playing bingo with family over Thanksgiving evening. Players collaboratively create a pool of bingo options, receive randomized cards, and mark spaces as events occur throughout the evening.
+
+**Status:** Core features implemented and functional (Phase 1 & 2 complete)
 
 ## Getting Started
 
@@ -71,16 +73,22 @@ bingo-party/
 └── package.json      # Workspace configuration
 ```
 
-## Phase 1 Features
+## Features
 
-- Room creation and join code system
-- Player joining with names
-- Adding/removing options from pool
-- Card generation and distribution
-- Mark/unmark spaces
-- Win detection
-- Real-time updates via WebSocket
-- Session persistence with localStorage
+### Core Gameplay
+- **Room System:** Create rooms with 5-character join codes for easy sharing
+- **Collaborative Pool:** Players submit and curate bingo space options together
+- **Randomized Cards:** Each player gets a unique 5x5 card with exactly one randomly-placed free space
+- **Real-time Marking:** Mark spaces as events occur, with instant updates across all players
+- **Win Detection:** Automatic detection of winning lines (horizontal, vertical, diagonal)
+- **Multiple Winners:** Support for simultaneous winners
+
+### Technical Features
+- **Session Persistence:** Players can disconnect and reconnect without losing progress
+- **Card Viewing:** Review all players' cards to see who has what spaces
+- **Mobile-First Design:** Responsive UI optimized for phones and tablets
+- **Real-time Notifications:** Live updates when players mark spaces or win
+- **WebSocket Communication:** Low-latency real-time updates via Socket.IO
 
 ## Architecture
 
@@ -105,6 +113,31 @@ bingo-party/
   - `JoinRoom`: Enter player name
   - `Room`: Lobby (add options) or Game (bingo card)
 
+## Deployment
+
+### Production Deployment
+
+The application is ready for deployment to platforms that support Node.js and PostgreSQL:
+
+**Recommended Platforms:**
+- **Railway:** Simple deployment with built-in PostgreSQL, good WebSocket support
+- **Render:** Free tier available, supports Node + PostgreSQL
+- **Fly.io:** Excellent WebSocket support, global edge deployment
+
+**Deployment Checklist:**
+1. Set up PostgreSQL database on your hosting platform
+2. Configure environment variables (see `.env.example` files)
+3. Run database migrations: `npm run migration:run:prod --workspace=backend`
+4. Build both frontend and backend: `npm run build`
+5. Ensure WebSocket connections are properly configured (Socket.IO uses both HTTP and WebSocket protocols)
+6. Configure CORS settings in backend for your frontend domain
+
+**Environment Variables:**
+- Backend requires: `DATABASE_URL`, `PORT`, `NODE_ENV`, `FRONTEND_URL`
+- Frontend requires: `VITE_BACKEND_URL`, `VITE_WS_URL`
+
+See the `.env.example` files in each workspace for complete configuration.
+
 ## Troubleshooting
 
 ### Database connection failed
@@ -122,4 +155,19 @@ bingo-party/
 - Run migrations again: `npm run migration:run --workspace=backend`
 - Revert last migration: `npm run migration:revert --workspace=backend`
 
-See CLAUDE.md for detailed project specification.
+## Known Limitations & Future Enhancements
+
+### Security Considerations
+- **Player ID Spoofing:** Current implementation allows clients to send their own `playerId` in mark/unmark events. This is acceptable for trusted family gameplay but should be addressed before public deployment.
+- **Session Token Handling:** Tokens are sent in socket event payloads and visible in network traffic. Consider moving to WebSocket handshake authentication.
+
+### Planned Features
+- Avatar upload/selfie/doodle feature
+- Room closing mechanism to prevent new players from joining
+- Multiple simultaneous games per player
+- Game restart/reset functionality
+- History and statistics tracking
+- Room expiration policy
+- Mobile app wrapper for offline support
+
+See CLAUDE.md for detailed project specification and technical implementation notes.

@@ -1,8 +1,38 @@
 # Bingo Party - Project Specification
 
+**Status:** Core features implemented and functional (Phase 1 complete)
+
 ## Project Overview
 
 A mobile-first web app for playing bingo with family over Thanksgiving evening. Players collaboratively create a pool of bingo options, receive randomized cards, and mark spaces as events occur throughout the evening.
+
+## Tech Stack
+
+### Backend
+- **Framework:** NestJS
+- **Real-time:** Socket.IO for WebSocket connections
+- **Database:** PostgreSQL with TypeORM
+- **Key Services:**
+  - `RoomsService`: Room management and options pool
+  - `PlayersService`: Player sessions and authentication
+  - `CardsService`: Card generation with Fisher-Yates shuffle, mark/unmark, win detection
+  - `GameGateway`: Socket.IO event handlers for real-time updates
+
+### Frontend
+- **Framework:** React 19 with TypeScript
+- **Build Tool:** Vite
+- **Styling:** TailwindCSS v4 (mobile-first)
+- **Real-time:** Socket.IO client
+- **Routing:** React Router
+- **State Management:** React Context (Socket, Notifications)
+- **Key Pages:**
+  - `Home`: Create or join room
+  - `JoinRoom`: Enter player name
+  - `Room`: Lobby (add options) or Game (bingo card)
+
+### Infrastructure
+- **Development:** Docker Compose for PostgreSQL
+- **Deployment:** Railway, Render, or Fly.io recommended for production
 
 ## Core User Flow
 
@@ -116,26 +146,6 @@ A mobile-first web app for playing bingo with family over Thanksgiving evening. 
 - Session tokens are currently sent in socket event payloads
 - Tokens are visible in network traffic (WebSocket messages)
 - **Future Improvement**: Consider moving authentication to WebSocket handshake or using JWT with proper expiration
-
-## Recommended Tech Stack
-
-### Backend
-- **Framework:** NestJS (familiar to User)
-- **Real-time:** Socket.IO for WebSocket connections
-- **Database:** PostgreSQL for persistence
-- **Optional:** Redis for session management (but PostgreSQL is sufficient for MVP scale)
-
-### Frontend
-- **Framework:** React
-- **Build Tool:** Vite
-- **Styling:** TailwindCSS
-- **Real-time:** Socket.IO Client
-- **State Management:** React Context + Hooks
-
-### Deployment
-- **Recommended:** Railway, Render (free tiers, support Node + Postgres)
-- **Alternative:** Fly.io (better WebSocket support)
-- **Overkill but viable:** AWS ECS + RDS
 
 ## Data Model
 
@@ -251,48 +261,45 @@ On socket reconnect:
      - All current marks
 ```
 
-## Open Questions / Future Enhancements
+## Implemented Features
 
-- Avatar upload/selfie/doodle feature (nice-to-have)
+✅ **Phase 1 - Core Game Loop (Complete)**
+- Room creation and join code system
+- Player joining with names
+- Adding/removing options from pool
+- Card generation and distribution
+- Mark/unmark spaces
+- Win detection
+- Real-time updates via WebSocket
+- Session persistence with localStorage
+
+✅ **Phase 2 - Polish (Complete)**
+- Mobile-first responsive design
+- Real-time notifications
+- Card viewing for all players
+- Reconnection handling
+
+## Future Enhancements
+
+- Avatar upload/selfie/doodle feature
+- Room closing mechanism
 - Multiple simultaneous games per player
 - Game restart/reset functionality
 - History and statistics tracking
 - Room expiration policy
 - Mobile app wrapper for better offline support
 
-## Development Priority
-
-1. **Phase 1 - Core Game Loop**
-   - Room creation and join code system
-   - Player joining with names
-   - Adding/removing options from pool
-   - Card generation and distribution
-   - Mark/unmark spaces
-   - Win detection
-
-2. **Phase 2 - Polish**
-   - Mobile-first responsive design
-   - Real-time notifications
-   - Card viewing for all players
-   - Room closing mechanism
-   - Reconnection handling
-
-3. **Phase 3 - Nice-to-Have**
-   - Avatar feature (selfie/upload/doodle)
-   - Multiple games per player
-   - Room history/statistics
-
 ## Success Criteria
 
-The MVP is successful if:
-- Family members can create and join rooms with ease
-- Options can be collaboratively added and curated
-- Cards are properly randomized with exactly one free space each
-- Real-time marking works smoothly across devices
-- Winners are correctly detected
-- Players can step away and return to their cards
-- The experience works well on mobile devices
-- The game runs smoothly on Thanksgiving night for 4-8 hours
+The MVP meets the following criteria:
+- ✅ Family members can create and join rooms with ease
+- ✅ Options can be collaboratively added and curated
+- ✅ Cards are properly randomized with exactly one free space each
+- ✅ Real-time marking works smoothly across devices
+- ✅ Winners are correctly detected
+- ✅ Players can step away and return to their cards
+- ✅ The experience works well on mobile devices
+- 🎯 The game runs smoothly on Thanksgiving night for 4-8 hours (pending live testing)
 
 
 # IMPORTANT
