@@ -1,5 +1,21 @@
 const API_URL = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
 
+const handleApiResponse = async (response: Response, defaultErrorMessage: string) => {
+  if (!response.ok) {
+    try {
+      const error = await response.json();
+      throw new Error(error.message || defaultErrorMessage);
+    } catch (e) {
+      // If parsing JSON fails, throw default message
+      if (e instanceof Error && e.message !== defaultErrorMessage) {
+        throw e;
+      }
+      throw new Error(defaultErrorMessage);
+    }
+  }
+  return response.json();
+};
+
 export const api = {
   async createRoom(prePopulate: boolean = false) {
     const response = await fetch(`${API_URL}/rooms`, {
@@ -10,11 +26,7 @@ export const api = {
       body: JSON.stringify({ prePopulate }),
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to create room');
-    }
-
-    return response.json();
+    return handleApiResponse(response, 'Failed to create room');
   },
 
   async joinRoom(joinCode: string, name: string, avatarUrl?: string) {
@@ -26,33 +38,17 @@ export const api = {
       body: JSON.stringify({ name, avatarUrl }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to join room');
-    }
-
-    return response.json();
+    return handleApiResponse(response, 'Failed to join room');
   },
 
   async getRoomByJoinCode(joinCode: string) {
     const response = await fetch(`${API_URL}/rooms/by-code/${joinCode}`);
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to get room');
-    }
-
-    return response.json();
+    return handleApiResponse(response, 'Failed to get room');
   },
 
   async getRoom(roomId: string) {
     const response = await fetch(`${API_URL}/rooms/${roomId}`);
-
-    if (!response.ok) {
-      throw new Error('Failed to get room');
-    }
-
-    return response.json();
+    return handleApiResponse(response, 'Failed to get room');
   },
 
   async closeRoom(roomId: string) {
@@ -63,10 +59,6 @@ export const api = {
       },
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to close room');
-    }
-
-    return response.json();
+    return handleApiResponse(response, 'Failed to close room');
   },
 };

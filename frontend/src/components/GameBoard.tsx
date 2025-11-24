@@ -4,6 +4,7 @@ import { type Room, type Player, type CardSpace, type Notification } from '../ty
 import { useSocket } from '../contexts/SocketContext';
 import { useNotifications } from '../contexts/NotificationContext';
 import { NotificationLog } from './NotificationLog';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface GameBoardProps {
   room: Room;
@@ -31,14 +32,15 @@ export const GameBoard = ({ room, currentPlayer, onViewAllCards, notifications }
   };
 
   const handleCopyRoomCode = async () => {
-    try {
-      await navigator.clipboard.writeText(room.joinCode);
-      setCopied(true);
-      addNotification('Room code copied to clipboard!', 'success');
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      addNotification('Failed to copy room code', 'warning');
-    }
+    await copyToClipboard(
+      room.joinCode,
+      () => {
+        setCopied(true);
+        addNotification('Room code copied to clipboard!', 'success');
+        setTimeout(() => setCopied(false), 2000);
+      },
+      (message) => addNotification(message, 'warning')
+    );
   };
 
   if (!currentPlayer.card) {

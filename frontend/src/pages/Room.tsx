@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { sessionStorage } from '../services/session';
@@ -47,7 +47,6 @@ export const Room = () => {
         // Join socket room
         joinSocketRoom(roomId!, session.sessionToken);
       } catch (error) {
-        console.error('Failed to load room:', error);
         navigate('/');
       } finally {
         setLoading(false);
@@ -57,111 +56,138 @@ export const Room = () => {
     loadRoom();
   }, [roomId, navigate, joinSocketRoom]);
 
-  // Helper function to update both room and currentPlayer
-  const updateRoomData = (roomData: RoomType) => {
-    setRoom(roomData);
-    const player = roomData.players.find((p: Player) => p.id === currentPlayer?.id);
-    setCurrentPlayer(player || null);
-  };
+  // Store latest room state in ref to avoid re-registering socket listeners
+  const roomRef = useRef(room);
+  roomRef.current = room;
 
+  // Store currentPlayer ID in ref
+  const currentPlayerIdRef = useRef(currentPlayer?.id);
+  currentPlayerIdRef.current = currentPlayer?.id;
+
+  // Stable callback to refresh room data
+  const refreshRoom = useCallback(async () => {
+    try {
+      const roomData = await api.getRoom(roomId!);
+      setRoom(roomData);
+      const player = roomData.players.find((p: Player) => p.id === currentPlayerIdRef.current);
+      setCurrentPlayer(player || null);
+    } catch (error) {
+      // Silently fail - room might be temporarily unavailable
+    }
+  }, [roomId]);
+
+  // Setup socket listeners - only re-register when socket changes, not when room changes
   useEffect(() => {
-    if (!socket || !room) return;
+    if (!socket) return;
 
-    socket.on('connect', () => {
+    const handleConnect = () => {
       addNotification('Connected to server', 'success');
-    });
+    };
 
-    socket.on('disconnect', () => {
+    const handleDisconnect = () => {
       addNotification('Disconnected from server', 'warning');
-    });
+    };
 
-    socket.on('reconnect', () => {
+    const handleReconnect = () => {
       addNotification('Reconnected successfully!', 'success');
-      // Reload room data after reconnection
-      api.getRoom(roomId!).then(updateRoomData);
-    });
+      refreshRoom();
+    };
 
-    socket.on('player-joined', (data) => {
+    const handlePlayerJoined = (data: { name: string }) => {
       addNotification(`${data.name} joined the room`, 'info');
-      // Reload room data
-      api.getRoom(roomId!).then(updateRoomData);
-    });
+      refreshRoom();
+    };
 
-    socket.on('option-added', (data) => {
+    const handleOptionAdded = (data: { option: string }) => {
       setRoom((prev) =>
         prev ? { ...prev, optionsPool: [...prev.optionsPool, data.option] } : prev
       );
-    });
+    };
 
-    socket.on('option-removed', (data) => {
+    const handleOptionRemoved = (data: { option: string }) => {
       setRoom((prev) =>
         prev
           ? { ...prev, optionsPool: prev.optionsPool.filter((opt) => opt !== data.option) }
           : prev
       );
-    });
+    };
 
-    socket.on('cards-created', () => {
+    const handleCardsCreated = () => {
       addNotification('Cards have been created! Game starting...', 'success');
-      // Reload room to get cards
-      api.getRoom(roomId!).then(updateRoomData);
-    });
+      refreshRoom();
+    };
 
-    socket.on('space-marked', (data) => {
-      const player = room.players.find((p) => p.id === data.playerId);
+    const handleSpaceMarked = (data: { playerId: string; optionText: string }) => {
+      const player = roomRef.current?.players.find((p) => p.id === data.playerId);
       const playerName = player?.name || 'A player';
       addNotification(`${playerName} marked: ${data.optionText}`, 'info');
-      // Reload room to update card states
-      api.getRoom(roomId!).then(updateRoomData);
-    });
+      refreshRoom();
+    };
 
-    socket.on('space-unmarked', (data) => {
-      const player = room.players.find((p) => p.id === data.playerId);
+    const handleSpaceUnmarked = (data: { playerId: string; optionText: string }) => {
+      const player = roomRef.current?.players.find((p) => p.id === data.playerId);
       const playerName = player?.name || 'A player';
       addNotification(`${playerName} unmarked: ${data.optionText}`, 'info');
-      // Reload room to update card states
-      api.getRoom(roomId!).then(updateRoomData);
-    });
+      refreshRoom();
+    };
 
-    socket.on('player-won', (data) => {
+    const handlePlayerWon = (data: { name: string }) => {
       addNotification(`${data.name} got BINGO!`, 'success');
-    });
+    };
 
-    socket.on('room-closed', () => {
+    const handleRoomClosed = () => {
       addNotification('Room has been closed to new players', 'info');
       setRoom((prev) => (prev ? { ...prev, isOpen: false } : prev));
-    });
+    };
 
-    socket.on('game-state', (data) => {
-      updateRoomData(data);
-    });
+    const handleGameState = (data: RoomType) => {
+      setRoom(data);
+      const player = data.players.find((p: Player) => p.id === currentPlayerIdRef.current);
+      setCurrentPlayer(player || null);
+    };
 
-    socket.on('error', (data) => {
+    const handleError = (data: { message: string }) => {
       addNotification(data.message, 'warning');
-    });
+    };
 
-    socket.on('all-cards', (data) => {
+    const handleAllCards = (data: { cards: PlayerCard[] }) => {
       setAllCards(data.cards);
       setShowAllCards(true);
-    });
+    };
+
+    // Register all listeners
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('reconnect', handleReconnect);
+    socket.on('player-joined', handlePlayerJoined);
+    socket.on('option-added', handleOptionAdded);
+    socket.on('option-removed', handleOptionRemoved);
+    socket.on('cards-created', handleCardsCreated);
+    socket.on('space-marked', handleSpaceMarked);
+    socket.on('space-unmarked', handleSpaceUnmarked);
+    socket.on('player-won', handlePlayerWon);
+    socket.on('room-closed', handleRoomClosed);
+    socket.on('game-state', handleGameState);
+    socket.on('error', handleError);
+    socket.on('all-cards', handleAllCards);
 
     return () => {
-      socket.off('connect');
-      socket.off('disconnect');
-      socket.off('reconnect');
-      socket.off('player-joined');
-      socket.off('option-added');
-      socket.off('option-removed');
-      socket.off('cards-created');
-      socket.off('space-marked');
-      socket.off('space-unmarked');
-      socket.off('player-won');
-      socket.off('room-closed');
-      socket.off('game-state');
-      socket.off('error');
-      socket.off('all-cards');
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('reconnect', handleReconnect);
+      socket.off('player-joined', handlePlayerJoined);
+      socket.off('option-added', handleOptionAdded);
+      socket.off('option-removed', handleOptionRemoved);
+      socket.off('cards-created', handleCardsCreated);
+      socket.off('space-marked', handleSpaceMarked);
+      socket.off('space-unmarked', handleSpaceUnmarked);
+      socket.off('player-won', handlePlayerWon);
+      socket.off('room-closed', handleRoomClosed);
+      socket.off('game-state', handleGameState);
+      socket.off('error', handleError);
+      socket.off('all-cards', handleAllCards);
     };
-  }, [socket, room, roomId, addNotification, currentPlayer]);
+  }, [socket, addNotification, refreshRoom]);
 
   if (loading) {
     return (

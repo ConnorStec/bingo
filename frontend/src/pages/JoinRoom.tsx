@@ -36,7 +36,6 @@ export const JoinRoom = () => {
         }
       } catch (err) {
         // Room doesn't exist or other error, show join form
-        console.error('Failed to check room:', err);
       }
 
       setIsCheckingSession(false);
@@ -65,8 +64,8 @@ export const JoinRoom = () => {
 
       // Navigate to room
       navigate(`/room/${roomId}`);
-    } catch (err: any) {
-      setError(err.message || 'Failed to join room');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to join room');
     } finally {
       setIsJoining(false);
     }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { type Room, type Player } from '../types';
 import { useSocket } from '../contexts/SocketContext';
 import { useNotifications } from '../contexts/NotificationContext';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface LobbyProps {
   room: Room;
@@ -31,14 +32,15 @@ export const Lobby = ({ room, currentPlayer }: LobbyProps) => {
   };
 
   const handleCopyRoomCode = async () => {
-    try {
-      await navigator.clipboard.writeText(room.joinCode);
-      setCopied(true);
-      addNotification('Room code copied to clipboard!', 'success');
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      addNotification('Failed to copy room code', 'warning');
-    }
+    await copyToClipboard(
+      room.joinCode,
+      () => {
+        setCopied(true);
+        addNotification('Room code copied to clipboard!', 'success');
+        setTimeout(() => setCopied(false), 2000);
+      },
+      (message) => addNotification(message, 'warning')
+    );
   };
 
   const canCreateCards = room.optionsPool.length >= 24;

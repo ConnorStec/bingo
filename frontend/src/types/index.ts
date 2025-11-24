@@ -33,7 +33,7 @@ export interface CardSpace {
   id: string;
   cardId: string;
   position: number;
-  optionText: string | null;
+  optionText: string; // Free spaces use 'Free Space' as the text
   isFreeSpace: boolean;
   isMarked: boolean;
 }

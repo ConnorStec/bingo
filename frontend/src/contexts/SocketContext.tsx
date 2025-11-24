@@ -43,30 +43,18 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     });
 
     newSocket.on('connect', () => {
-      console.log('Socket connected');
       setIsConnected(true);
     });
 
     newSocket.on('disconnect', () => {
-      console.log('Socket disconnected');
       setIsConnected(false);
     });
 
-    newSocket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
-    });
-
-    newSocket.on('reconnect_attempt', (attemptNumber) => {
-      console.log(`Reconnection attempt ${attemptNumber}`);
-    });
-
-    newSocket.on('reconnect', (attemptNumber) => {
-      console.log(`Reconnected after ${attemptNumber} attempts`);
+    newSocket.on('reconnect', () => {
       setIsConnected(true);
     });
 
     newSocket.on('reconnect_failed', () => {
-      console.error('Reconnection failed after all attempts');
       setIsConnected(false);
     });
 

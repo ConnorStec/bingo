@@ -62,7 +62,7 @@ A mobile-first web app for playing bingo with family over Thanksgiving evening. 
 - Players can debate nuanced duplicates in person and remove as needed
 - When cards are created:
   - Each card is a 5x5 grid (25 spaces total)
-  - Exactly 1 "Free Space" placed randomly on each card
+  - Exactly 1 "Free Space" placed randomly on each card (excluding corners and center: positions 0, 4, 12, 20, 24)
   - Remaining 24 spaces filled from the pool
   - Each card must be unique (different random arrangement)
   - Use Fisher-Yates shuffle algorithm per card
@@ -103,6 +103,19 @@ A mobile-first web app for playing bingo with family over Thanksgiving evening. 
 - No game restart/reset functionality
 - No history/statistics tracking (save for post-MVP)
 - No complex reconnection logic beyond session tokens
+
+### Security Considerations
+
+**Known Issues (Trust-Based Design):**
+- **Player ID Spoofing**: The current implementation allows clients to send their own `playerId` in mark-space and unmark-space events. This means a malicious player could theoretically mark spaces on other players' cards.
+  - **Current Status**: Acceptable for MVP as this is a family game with trusted participants
+  - **Future Improvement**: Derive `playerId` from session token on the server side for all mark/unmark operations
+  - **Impact**: Low priority for trusted family gameplay, but should be addressed before public deployment
+
+**Session Token Handling:**
+- Session tokens are currently sent in socket event payloads
+- Tokens are visible in network traffic (WebSocket messages)
+- **Future Improvement**: Consider moving authentication to WebSocket handshake or using JWT with proper expiration
 
 ## Recommended Tech Stack
 

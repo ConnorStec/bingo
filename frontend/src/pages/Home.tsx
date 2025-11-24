@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { sessionStorage } from '../services/session';
+import { useNotifications } from '../contexts/NotificationContext';
 
 export const Home = () => {
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
   const [isCreating, setIsCreating] = useState(false);
   const [joinCode, setJoinCode] = useState('');
   const [isJoining, setIsJoining] = useState(false);
@@ -16,8 +18,7 @@ export const Home = () => {
       const { joinCode } = await api.createRoom(prePopulateOptions);
       navigate(`/join/${joinCode}`);
     } catch (error) {
-      console.error('Failed to create room:', error);
-      alert('Failed to create room. Please try again.');
+      addNotification('Failed to create room. Please try again.', 'warning');
     } finally {
       setIsCreating(false);
     }
