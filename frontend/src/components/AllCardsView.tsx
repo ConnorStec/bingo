@@ -42,7 +42,7 @@ export const AllCardsView = ({ cards, onClose }: AllCardsViewProps) => {
                       <div
                         key={space.position}
                         className={`
-                          aspect-square flex items-center justify-center p-1 rounded text-xs font-medium
+                          aspect-square flex items-center justify-center p-1 rounded text-[9px] font-medium
                           ${
                             space.isFreeSpace
                               ? 'bg-yellow-400 text-yellow-900'
@@ -52,7 +52,7 @@ export const AllCardsView = ({ cards, onClose }: AllCardsViewProps) => {
                           }
                         `}
                       >
-                        <span className="text-center leading-tight break-words overflow-hidden">
+                        <span className="text-center leading-tight break-words overflow-hidden line-clamp-2 px-0.5">
                           {space.isFreeSpace ? 'FREE' : space.optionText}
                         </span>
                       </div>

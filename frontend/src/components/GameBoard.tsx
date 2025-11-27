@@ -92,7 +92,7 @@ export const GameBoard = ({ room, currentPlayer, onViewAllCards, notifications }
                   onClick={() => handleSpaceClick(space)}
                   disabled={space.isFreeSpace}
                   className={`
-                    aspect-square flex items-center justify-center p-1 sm:p-2 rounded-lg font-medium text-xs sm:text-sm
+                    aspect-square flex items-center justify-center p-1 sm:p-2 rounded-lg font-medium text-[10px] sm:text-xs
                     transition-all duration-200 transform active:scale-95 min-h-[44px] min-w-[44px]
                     ${
                       space.isFreeSpace
@@ -103,7 +103,7 @@ export const GameBoard = ({ room, currentPlayer, onViewAllCards, notifications }
                     }
                   `}
                 >
-                  <span className="text-center leading-tight break-words overflow-hidden">
+                  <span className="text-center leading-tight break-words overflow-hidden line-clamp-3 px-0.5">
                     {space.isFreeSpace ? 'FREE' : space.optionText}
                   </span>
                 </button>

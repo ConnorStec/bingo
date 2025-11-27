@@ -14,6 +14,7 @@ export const Lobby = ({ room, currentPlayer }: LobbyProps) => {
   const { addNotification } = useNotifications();
   const [newOption, setNewOption] = useState('');
   const [copied, setCopied] = useState(false);
+  const [showLengthWarning, setShowLengthWarning] = useState(false);
 
   const handleAddOption = (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,7 +117,10 @@ export const Lobby = ({ room, currentPlayer }: LobbyProps) => {
             <input
               type="text"
               value={newOption}
-              onChange={(e) => setNewOption(e.target.value)}
+              onChange={(e) => {
+                setNewOption(e.target.value);
+                setShowLengthWarning(e.target.value.length > 50);
+              }}
               placeholder="Add a bingo option..."
               className="flex-1 px-4 py-3 min-h-[44px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base"
             />
@@ -128,6 +132,11 @@ export const Lobby = ({ room, currentPlayer }: LobbyProps) => {
               Add
             </button>
           </div>
+          {showLengthWarning && (
+            <div className="text-xs text-orange-600 bg-orange-50 px-3 py-2 rounded mt-2">
+              ⚠️ This option is quite long ({newOption.length} characters). Consider shortening it for better readability on cards.
+            </div>
+          )}
         </form>
 
         <div className="space-y-2">
