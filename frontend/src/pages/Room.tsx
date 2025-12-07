@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { sessionStorage } from '../services/session';
 import { useSocket } from '../contexts/SocketContext';
-import { useNotifications } from '../contexts/NotificationContext';
-import { type Room as RoomType, type Player, type CardSpace } from '../types';
+import { useActivity } from '../contexts/ActivityContext';
+import { type Room as RoomType, type Player, type CardSpace, type ChatMessage } from '../types';
 import { Lobby } from '../components/Lobby';
 import { GameBoard } from '../components/GameBoard';
 import { AllCardsView } from '../components/AllCardsView';
@@ -21,7 +21,7 @@ export const Room = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const { socket, joinSocketRoom, getAllCards } = useSocket();
-  const { addNotification, notifications } = useNotifications();
+  const { addNotification, addChatMessage, loadChatHistory, activities } = useActivity();
   const [room, setRoom] = useState<RoomType | null>(null);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
@@ -140,10 +140,19 @@ export const Room = () => {
       setRoom((prev) => (prev ? { ...prev, isOpen: false } : prev));
     };
 
-    const handleGameState = (data: RoomType) => {
+    const handleGameState = (data: RoomType & { chatHistory?: ChatMessage[] }) => {
       setRoom(data);
       const player = data.players.find((p: Player) => p.id === currentPlayerIdRef.current);
       setCurrentPlayer(player || null);
+
+      // Load chat history if present
+      if (data.chatHistory) {
+        loadChatHistory(data.chatHistory);
+      }
+    };
+
+    const handleChatMessage = (data: ChatMessage) => {
+      addChatMessage(data);
     };
 
     const handleError = (data: { message: string }) => {
@@ -168,6 +177,7 @@ export const Room = () => {
     socket.on('player-won', handlePlayerWon);
     socket.on('room-closed', handleRoomClosed);
     socket.on('game-state', handleGameState);
+    socket.on('chat-message', handleChatMessage);
     socket.on('error', handleError);
     socket.on('all-cards', handleAllCards);
 
@@ -184,10 +194,11 @@ export const Room = () => {
       socket.off('player-won', handlePlayerWon);
       socket.off('room-closed', handleRoomClosed);
       socket.off('game-state', handleGameState);
+      socket.off('chat-message', handleChatMessage);
       socket.off('error', handleError);
       socket.off('all-cards', handleAllCards);
     };
-  }, [socket, addNotification, refreshRoom]);
+  }, [socket, addNotification, addChatMessage, loadChatHistory, refreshRoom]);
 
   if (loading) {
     return (
@@ -215,7 +226,7 @@ export const Room = () => {
           room={room}
           currentPlayer={currentPlayer}
           onViewAllCards={handleViewAllCards}
-          notifications={notifications}
+          activities={activities}
         />
       )}
       {showAllCards && (

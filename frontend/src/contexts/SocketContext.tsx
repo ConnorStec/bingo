@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { sessionStorage } from '../services/session';
 
 const WS_URL = import.meta.env.VITE_WS_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
 
@@ -14,6 +15,7 @@ interface SocketContextType {
   unmarkSpace: (roomId: string, cardId: string, position: number, playerId: string) => void;
   closeRoom: (roomId: string) => void;
   getAllCards: (roomId: string) => void;
+  sendChatMessage: (roomId: string, message: string) => void;
 }
 
 const SocketContext = createContext<SocketContextType | null>(null);
@@ -97,6 +99,17 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     socket?.emit('get-all-cards', { roomId });
   };
 
+  const sendChatMessage = (roomId: string, message: string) => {
+    const session = sessionStorage.get();
+    if (session?.sessionToken) {
+      socket?.emit('send-chat-message', {
+        roomId,
+        message,
+        sessionToken: session.sessionToken,
+      });
+    }
+  };
+
   const value = {
     socket,
     isConnected,
@@ -108,6 +121,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     unmarkSpace,
     closeRoom,
     getAllCards,
+    sendChatMessage,
   };
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

@@ -5,6 +5,7 @@ import { Room } from '../entities/room.entity';
 import { Player } from '../entities/player.entity';
 import { Card } from '../entities/card.entity';
 import { CardSpace } from '../entities/card-space.entity';
+import { ChatMessage } from '../entities/chat-message.entity';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { CardSpace } from '../entities/card-space.entity';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get('DATABASE_URL'),
-        entities: [Room, Player, Card, CardSpace],
+        entities: [Room, Player, Card, CardSpace, ChatMessage],
         synchronize: configService.get('NODE_ENV') !== 'production',
         logging: configService.get('NODE_ENV') === 'development',
       }),

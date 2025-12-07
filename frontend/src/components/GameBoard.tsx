@@ -1,22 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { type Room, type Player, type CardSpace, type Notification } from '../types';
+import { type Room, type Player, type CardSpace, type ActivityItem } from '../types';
 import { useSocket } from '../contexts/SocketContext';
-import { useNotifications } from '../contexts/NotificationContext';
-import { NotificationLog } from './NotificationLog';
+import { useActivity } from '../contexts/ActivityContext';
+import { ActivityLog } from './ActivityLog';
+import { ChatInput } from './ChatInput';
 import { copyToClipboard } from '../utils/clipboard';
 
 interface GameBoardProps {
   room: Room;
   currentPlayer: Player;
   onViewAllCards: () => void;
-  notifications: Notification[];
+  activities: ActivityItem[];
 }
 
-export const GameBoard = ({ room, currentPlayer, onViewAllCards, notifications }: GameBoardProps) => {
+export const GameBoard = ({ room, currentPlayer, onViewAllCards, activities }: GameBoardProps) => {
   const navigate = useNavigate();
-  const { markSpace, unmarkSpace } = useSocket();
-  const { addNotification } = useNotifications();
+  const { markSpace, unmarkSpace, sendChatMessage } = useSocket();
+  const { addNotification } = useActivity();
   const [copied, setCopied] = useState(false);
 
   const handleSpaceClick = (space: CardSpace) => {
@@ -140,9 +141,12 @@ export const GameBoard = ({ room, currentPlayer, onViewAllCards, notifications }
             </div>
           </div>
 
-          {/* Notification Log - Fills remaining space */}
-          <div style={{ height: '20vh', minHeight: '120px' }}>
-            <NotificationLog notifications={notifications} />
+          {/* Activity Log with Chat */}
+          <div style={{ height: '25vh', minHeight: '150px' }} className="flex flex-col gap-2">
+            <div className="flex-1 min-h-0">
+              <ActivityLog activities={activities} currentPlayerId={currentPlayer.id} />
+            </div>
+            <ChatInput onSendMessage={(message) => sendChatMessage(room.id, message)} />
           </div>
         </div>
       </div>

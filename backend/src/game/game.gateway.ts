@@ -12,6 +12,7 @@ import { Server, Socket } from 'socket.io';
 import { RoomsService } from '../rooms/rooms.service';
 import { CardsService } from '../cards/cards.service';
 import { PlayersService } from '../players/players.service';
+import { ChatService } from '../chat/chat.service';
 
 @WebSocketGateway({
   cors: {
@@ -29,6 +30,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private roomsService: RoomsService,
     private cardsService: CardsService,
     private playersService: PlayersService,
+    private chatService: ChatService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -66,9 +68,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       avatarUrl: player.avatarUrl,
     });
 
-    // Send current game state to connecting player
+    // Get room state and chat history
     const room = await this.roomsService.getRoomById(roomId);
-    client.emit('game-state', room);
+    const chatHistory = await this.chatService.getMessagesByRoom(roomId);
+
+    // Send current game state with chat history to connecting player
+    client.emit('game-state', {
+      ...room,
+      chatHistory,
+    });
   }
 
   @SubscribeMessage('add-option')
@@ -205,6 +213,42 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const cards = await this.cardsService.getAllCardsInRoom(roomId);
       client.emit('all-cards', { cards });
+    } catch (error) {
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @SubscribeMessage('send-chat-message')
+  async handleSendChatMessage(
+    @MessageBody() data: { roomId: string; sessionToken: string; message: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { roomId, sessionToken, message } = data;
+
+    try {
+      // Verify player belongs to room
+      const player = await this.playersService.getPlayerBySessionToken(sessionToken);
+      if (!player || player.roomId !== roomId) {
+        client.emit('error', { message: 'Invalid session' });
+        return;
+      }
+
+      // Create and save message
+      const chatMessage = await this.chatService.createMessage(
+        roomId,
+        player.id,
+        player.name,
+        message,
+      );
+
+      // Broadcast to all players in room (including sender)
+      this.server.to(roomId).emit('chat-message', {
+        id: chatMessage.id,
+        playerId: chatMessage.playerId,
+        playerName: chatMessage.playerName,
+        message: chatMessage.message,
+        createdAt: chatMessage.createdAt,
+      });
     } catch (error) {
       client.emit('error', { message: error.message });
     }

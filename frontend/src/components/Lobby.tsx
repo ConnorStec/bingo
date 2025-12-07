@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { type Room, type Player } from '../types';
 import { useSocket } from '../contexts/SocketContext';
-import { useNotifications } from '../contexts/NotificationContext';
+import { useActivity } from '../contexts/ActivityContext';
 import { copyToClipboard } from '../utils/clipboard';
 
 interface LobbyProps {
@@ -11,7 +11,7 @@ interface LobbyProps {
 
 export const Lobby = ({ room, currentPlayer }: LobbyProps) => {
   const { addOption, removeOption, createCards } = useSocket();
-  const { addNotification } = useNotifications();
+  const { addNotification } = useActivity();
   const [newOption, setNewOption] = useState('');
   const [copied, setCopied] = useState(false);
   const [showLengthWarning, setShowLengthWarning] = useState(false);

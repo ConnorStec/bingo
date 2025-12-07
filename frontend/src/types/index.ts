@@ -44,3 +44,21 @@ export interface Notification {
   message: string;
   timestamp: number;
 }
+
+export interface ChatMessage {
+  id: string;
+  playerId: string;
+  playerName: string;
+  message: string;
+  createdAt: string;
+}
+
+export interface ActivityItem {
+  id: string;
+  type: 'notification' | 'chat';
+  timestamp: number;
+  message: string;
+  notificationType?: 'info' | 'success' | 'warning';
+  playerId?: string;
+  playerName?: string;
+}
