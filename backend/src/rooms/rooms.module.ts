@@ -8,9 +8,10 @@ import { Room } from '../entities/room.entity';
 import { Player } from '../entities/player.entity';
 import { Card } from '../entities/card.entity';
 import { CardSpace } from '../entities/card-space.entity';
+import { LlmModule } from '../llm/llm.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Room, Player, Card, CardSpace])],
+  imports: [TypeOrmModule.forFeature([Room, Player, Card, CardSpace]), LlmModule],
   controllers: [RoomsController],
   providers: [RoomsService, PlayersService, CardsService],
   exports: [RoomsService],

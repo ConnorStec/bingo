@@ -10,9 +10,10 @@ import { Player } from '../entities/player.entity';
 import { Card } from '../entities/card.entity';
 import { CardSpace } from '../entities/card-space.entity';
 import { ChatMessage } from '../entities/chat-message.entity';
+import { LlmModule } from '../llm/llm.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Room, Player, Card, CardSpace, ChatMessage])],
+  imports: [TypeOrmModule.forFeature([Room, Player, Card, CardSpace, ChatMessage]), LlmModule],
   providers: [GameGateway, RoomsService, CardsService, PlayersService, ChatService],
 })
 export class GameModule {}

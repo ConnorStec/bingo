@@ -1,6 +1,7 @@
 export interface Room {
   id: string;
   joinCode: string;
+  title: string;
   creatorId: string;
   status: 'LOBBY' | 'PLAYING' | 'FINISHED';
   isOpen: boolean;
@@ -9,6 +10,8 @@ export interface Room {
   createdAt: string;
   lastActivity: string;
 }
+
+export type PrePopulateMode = 'off' | 'placeholders' | 'ai_gen';
 
 export interface Player {
   id: string;

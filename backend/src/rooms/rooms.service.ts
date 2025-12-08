@@ -3,34 +3,40 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Room, RoomStatus } from '../entities/room.entity';
 import { CreateRoomDto } from '../common/dto/create-room.dto';
+import { PrePopulateMode } from '../common/enums/pre-populate-mode.enum';
+import { LlmService } from '../llm/llm.service';
 
 @Injectable()
 export class RoomsService {
   constructor(
     @InjectRepository(Room)
     private roomRepository: Repository<Room>,
+    private llmService: LlmService,
   ) {}
 
-  async createRoom(createRoomDto?: CreateRoomDto) {
-    const joinCode = this.generateJoinCode();
+  async createRoom(createRoomDto: CreateRoomDto) {
+    const joinCode = await this.generateUniqueJoinCode();
+    const mode = createRoomDto.prePopulateMode ?? PrePopulateMode.OFF;
 
-    // Ensure join code is unique
-    const existing = await this.roomRepository.findOne({
-      where: { joinCode },
-    });
+    let optionsPool: string[] = [];
 
-    if (existing) {
-      // Recursively try again with a new code
-      return this.createRoom(createRoomDto);
+    switch (mode) {
+      case PrePopulateMode.PLACEHOLDERS:
+        optionsPool = Array.from({ length: 24 }, (_, i) => `Option ${i + 1}`);
+        break;
+      case PrePopulateMode.AI_GEN:
+        optionsPool = await this.llmService.generateBingoOptions(
+          createRoomDto.title,
+        );
+        break;
+      case PrePopulateMode.OFF:
+      default:
+        optionsPool = [];
     }
-
-    // Generate 24 test options if requested
-    const optionsPool = createRoomDto?.prePopulate
-      ? Array.from({ length: 24 }, (_, i) => `Option ${i + 1}`)
-      : [];
 
     const room = this.roomRepository.create({
       joinCode,
+      title: createRoomDto.title,
       creatorId: null, // Will be set when first player joins
       status: RoomStatus.LOBBY,
       isOpen: true,
@@ -38,6 +44,18 @@ export class RoomsService {
     });
 
     return this.roomRepository.save(room);
+  }
+
+  private async generateUniqueJoinCode(): Promise<string> {
+    let joinCode: string;
+    let existing: Room | null;
+
+    do {
+      joinCode = this.generateJoinCode();
+      existing = await this.roomRepository.findOne({ where: { joinCode } });
+    } while (existing);
+
+    return joinCode;
   }
 
   async getRoomByJoinCode(joinCode: string) {

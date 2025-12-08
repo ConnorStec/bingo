@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Param, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Param,
+  Body,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { PlayersService } from '../players/players.service';
 import { CardsService } from '../cards/cards.service';
@@ -7,6 +15,8 @@ import { CreateRoomDto } from '../common/dto/create-room.dto';
 
 @Controller('rooms')
 export class RoomsController {
+  private readonly logger = new Logger(RoomsController.name);
+
   constructor(
     private roomsService: RoomsService,
     private playersService: PlayersService,
@@ -15,11 +25,27 @@ export class RoomsController {
 
   @Post()
   async createRoom(@Body() createRoomDto: CreateRoomDto) {
-    const room = await this.roomsService.createRoom(createRoomDto);
-    return {
-      roomId: room.id,
-      joinCode: room.joinCode,
-    };
+    try {
+      const room = await this.roomsService.createRoom(createRoomDto);
+      return {
+        roomId: room.id,
+        joinCode: room.joinCode,
+        title: room.title,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to create room: ${error.message}`);
+      // Check if it's an LLM-related error
+      if (
+        error.code === 'ECONNREFUSED' ||
+        error.message?.includes('timeout') ||
+        error.message?.includes('LLM')
+      ) {
+        throw new InternalServerErrorException(
+          'AI generation is currently unavailable. Please try again or use placeholder options.',
+        );
+      }
+      throw error;
+    }
   }
 
   @Post(':joinCode/join')

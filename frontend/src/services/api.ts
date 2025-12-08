@@ -1,3 +1,5 @@
+import type { PrePopulateMode } from '../types';
+
 const API_URL = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
 
 const handleApiResponse = async (response: Response, defaultErrorMessage: string) => {
@@ -17,13 +19,13 @@ const handleApiResponse = async (response: Response, defaultErrorMessage: string
 };
 
 export const api = {
-  async createRoom(prePopulate: boolean = false) {
+  async createRoom(title: string, prePopulateMode: PrePopulateMode = 'off') {
     const response = await fetch(`${API_URL}/rooms`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ prePopulate }),
+      body: JSON.stringify({ title, prePopulateMode }),
     });
 
     return handleApiResponse(response, 'Failed to create room');

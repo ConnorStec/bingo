@@ -1,7 +1,13 @@
-import { IsOptional, IsBoolean } from 'class-validator';
+import { IsOptional, IsString, MaxLength, IsEnum, IsNotEmpty } from 'class-validator';
+import { PrePopulateMode } from '../enums/pre-populate-mode.enum';
 
 export class CreateRoomDto {
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(255)
+  title: string;
+
   @IsOptional()
-  @IsBoolean()
-  prePopulate?: boolean;
+  @IsEnum(PrePopulateMode)
+  prePopulateMode?: PrePopulateMode;
 }

@@ -17,6 +17,9 @@ export class Room {
   @Index()
   joinCode: string;
 
+  @Column({ type: 'varchar', length: 255, default: 'Untitled Room' })
+  title: string;
+
   @Column({ type: 'uuid', nullable: true })
   creatorId: string | null;
 

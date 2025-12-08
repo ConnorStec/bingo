@@ -50,7 +50,10 @@ export const Lobby = ({ room, currentPlayer }: LobbyProps) => {
     <div className="max-w-4xl mx-auto p-2 sm:p-4 space-y-4 sm:space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Room Lobby</h1>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">{room.title}</h1>
+            <p className="text-sm text-gray-500">Room Lobby</p>
+          </div>
           <div className="sm:text-right">
             <div className="text-sm text-gray-600">Join Code</div>
             <div className="flex items-center gap-2">
