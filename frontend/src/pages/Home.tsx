@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { sessionStorage } from '../services/session';
-import { useNotifications } from '../contexts/NotificationContext';
+import { useActivity } from '../contexts/ActivityContext';
 
 export const Home = () => {
   const navigate = useNavigate();
-  const { addNotification } = useNotifications();
+  const { addNotification } = useActivity();
   const [isCreating, setIsCreating] = useState(false);
   const [joinCode, setJoinCode] = useState('');
   const [isJoining, setIsJoining] = useState(false);
