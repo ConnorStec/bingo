@@ -106,32 +106,6 @@ bingo-party/
   - `JoinRoom`: Enter player name
   - `Room`: Lobby (add options) or Game (bingo card)
 
-## Deployment
-
-### Production Deployment
-
-The application is ready for deployment to platforms that support Node.js and PostgreSQL:
-
-**Recommended Platforms:**
-- **Railway:** Simple deployment with built-in PostgreSQL, good WebSocket support
-   - worked flawlessly for me. fast setup and deployments
-- **Render:** Free tier available, supports Node + PostgreSQL
-- **Fly.io:** Excellent WebSocket support, global edge deployment
-
-**Deployment Checklist:**
-1. Set up PostgreSQL database on your hosting platform
-2. Configure environment variables (see `.env.example` files)
-3. Run database migrations: `npm run migration:run:prod --workspace=backend`
-4. Build both frontend and backend: `npm run build`
-5. Ensure WebSocket connections are properly configured (Socket.IO uses both HTTP and WebSocket protocols)
-6. Configure CORS settings in backend for your frontend domain
-
-**Environment Variables:**
-- Backend requires: `DATABASE_URL`, `PORT`, `NODE_ENV`, `FRONTEND_URL`
-- Frontend requires: `VITE_BACKEND_URL`, `VITE_WS_URL`
-
-See the `.env.example` files in each workspace for complete configuration.
-
 ## Known Limitations & Future Enhancements
 
 ### Security Considerations
