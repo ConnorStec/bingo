@@ -4,7 +4,10 @@ import { RoomsController } from './rooms.controller';
 import { RoomsService } from './rooms.service';
 import { PlayersService } from '../players/players.service';
 import { CardsService } from '../cards/cards.service';
-import { Room, Player, Card, CardSpace } from '../entities';
+import { Room } from '../entities/room.entity';
+import { Player } from '../entities/player.entity';
+import { Card } from '../entities/card.entity';
+import { CardSpace } from '../entities/card-space.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Room, Player, Card, CardSpace])],

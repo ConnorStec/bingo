@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { Room } from './room.entity';
+import { Player } from './player.entity';
 
 @Entity('chat_messages')
 export class ChatMessage {
@@ -25,4 +26,8 @@ export class ChatMessage {
   @ManyToOne(() => Room, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'roomId' })
   room: Room;
+
+  @ManyToOne(() => Player, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'playerId' })
+  player: Player;
 }
