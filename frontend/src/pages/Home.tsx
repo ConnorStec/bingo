@@ -90,7 +90,6 @@ export const Home = () => {
                 type="text"
                 value={roomTitle}
                 onChange={(e) => setRoomTitle(e.target.value)}
-                placeholder="e.g., Thanksgiving Dinner Boomer Quotes"
                 maxLength={255}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               />
