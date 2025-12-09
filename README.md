@@ -20,10 +20,7 @@ Casual no-accounts bingo web app. Users create rooms with random join codes, add
 - **WebSocket Communication:** Low-latency real-time updates via Socket.IO
 - **AI Slop**: Connect your own OpenAI-compatible api and generate useless placeholder values
 
-![Home page](/readme_images/bingo-home.png?raw=true)
-![Lobby](/readme_images/bingo-lobby.png?raw=true)
-![Game](/readme_images/bingo-game.png?raw=true)
-![Cards](/readme_images/bingo-cards.png?raw=true)
+![Preview](/readme_images/bingo-composite.png?raw=true)
 
 ## Getting Started
 
